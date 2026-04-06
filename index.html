@@ -3,76 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的台灣百岳地圖紀錄 - 晨光明亮版</title>
+    <title>我的台灣百岳地圖紀錄 - 莫蘭迪峰礦藍版</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
-            /* 晨光質感配色 */
-            --mineral-blue: #1c2b39; 
-            --bg-color: #f4f7f6;     
-            --card-bg: #ffffff;      
-            --gold-accent: #d4af37;  
-            --text-main: #334155;    
-            --text-muted: #64748b;   
-            --border-color: #cbd5e1; 
-            --input-bg: #f8fafc;     
+            --mineral-blue: #3A5A6E; 
+            --card-bg: rgba(255, 255, 255, 0.9); 
+            --gold-accent: #E3B448;  
+            --text-main: #2C3E50;    
+            --text-muted: #7F8C8D;   
+            --border-color: #BDC3C7; 
+            --header-text: #FDFEFE;  
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--mineral-blue); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            background-image: linear-gradient(135deg, #4A6E82 0%, #3A5A6E 100%); 
+        }
         
-        .header-section { background-color: var(--mineral-blue); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: var(--gold-accent); letter-spacing: 2px; font-weight: 400; margin: 0 0 5px 0; }
-        p.subtitle { text-align: center; color: #94a3b8; margin: 0; letter-spacing: 1px; }
+        .header-section { padding: 10px 20px 20px 20px; text-align: center; margin-bottom: 10px; }
+        h1 { color: var(--header-text); letter-spacing: 3px; font-weight: 500; margin: 0 0 5px 0; font-size: 28px;}
+        p.subtitle { color: rgba(255, 255, 255, 0.8); margin: 0; letter-spacing: 2px; font-size: 14px;}
         
         .container { max-width: 1200px; margin: 0 auto; }
         
-        #map { height: 400px; width: 100%; border-radius: 12px; border: 4px solid var(--mineral-blue); margin-bottom: 25px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); z-index: 1; }
+        #map { height: 450px; width: 100%; border-radius: 8px; border: 4px solid #fff; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 1; }
         
-        .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
-        .progress-bar { height: 26px; background-color: var(--gold-accent); width: 0%; text-align: center; line-height: 26px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-container { width: 100%; background-color: rgba(255, 255, 255, 0.3); border-radius: 20px; overflow: hidden; margin-bottom: 25px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .progress-bar { height: 26px; background-color: var(--gold-accent); width: 0%; text-align: center; line-height: 26px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         
         .search-container { text-align: center; margin-bottom: 30px; }
-        #search-input { width: 100%; max-width: 450px; padding: 14px 20px; border-radius: 30px; border: 2px solid var(--border-color); background-color: var(--card-bg); color: var(--text-main); font-size: 16px; outline: none; transition: all 0.3s ease; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
-        #search-input:focus { border-color: var(--gold-accent); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2); }
+        #search-input { width: 100%; max-width: 450px; padding: 14px 20px; border-radius: 30px; border: none; background-color: var(--card-bg); color: var(--text-main); font-size: 16px; outline: none; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+        #search-input:focus { box-shadow: 0 0 0 3px rgba(227, 180, 72, 0.4); }
         #search-input::placeholder { color: #9ca3af; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; border-left: 6px solid var(--border-color); transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card:hover { box-shadow: 0 8px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        .card.climbed { border-left-color: var(--gold-accent); background-color: #fdfbf7; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(212, 175, 55, 0.15); }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; border-left: 6px solid var(--border-color); transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1); backdrop-filter: blur(5px); }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
+        .card.climbed { border-left-color: var(--gold-accent); background-color: #fff; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(227, 180, 72, 0.2); }
         
-        .card h3 { margin: 0 0 8px 0; color: var(--mineral-blue); font-size: 1.25rem; }
+        .card h3 { margin: 0 0 8px 0; color: var(--mineral-blue); font-size: 1.25rem; font-weight: 600;}
         .card p { margin: 0 0 15px 0; font-size: 14px; color: var(--text-muted); }
         
-        input[type="date"], input[type="text"] { width: 100%; margin-top: 10px; padding: 10px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--input-bg); color: var(--text-main); font-family: inherit; transition: border-color 0.3s; }
+        input[type="date"], input[type="text"] { width: 100%; margin-top: 10px; padding: 10px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 6px; background-color: #fff; color: var(--text-main); font-family: inherit; transition: border-color 0.3s; }
         input[type="date"]:focus, input[type="text"]:focus { border-color: var(--mineral-blue); outline: none; }
         input[type="date"]:disabled, input[type="text"]:disabled { background-color: #f1f5f9; color: #cbd5e1; cursor: not-allowed; border-color: #e2e8f0; }
         
         .checkbox-wrapper { display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 5px 0; }
         .checkbox-wrapper input { margin-right: 12px; transform: scale(1.4); cursor: pointer; accent-color: var(--gold-accent); }
         .checkbox-wrapper label { cursor: pointer; font-weight: 600; color: var(--text-main); }
+
+        /* ================= 新增：實體山岳圖示樣式 ================= */
+        .custom-mountain-icon { background: transparent; border: none; }
+        .mountain-marker { 
+            display: flex; flex-direction: column; align-items: center; 
+            width: 80px; margin-left: -40px; margin-top: -24px; cursor: pointer; 
+        }
+        .mountain-marker .icon { 
+            font-size: 18px; line-height: 1; 
+            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5)); 
+            transition: transform 0.2s; 
+        }
+        .mountain-marker:hover .icon { transform: scale(1.4); }
+        
+        .mountain-marker .name { 
+            font-size: 11px; font-weight: bold; padding: 2px 5px; 
+            border-radius: 4px; white-space: nowrap; margin-top: 2px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: all 0.2s; 
+        }
+        
+        /* 未登頂樣式 */
+        .mountain-marker.unclimbed .icon { color: #ffffff; opacity: 0.9; }
+        .mountain-marker.unclimbed .name { 
+            background: rgba(58, 90, 110, 0.85); color: #ffffff; 
+            border: 1px solid rgba(189, 195, 199, 0.5);
+        }
+        
+        /* 已登頂樣式 */
+        .mountain-marker.climbed .icon { 
+            color: #E3B448; filter: drop-shadow(0px 0px 5px rgba(227, 180, 72, 0.9)); 
+        }
+        .mountain-marker.climbed .name { 
+            background: rgba(227, 180, 72, 0.95); color: #2C3E50; 
+            border: 1px solid #2C3E50; font-size: 12px; /* 登頂的山名字稍微放大 */
+        }
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="header-section">
             <h1>TAIWAN 100 PEAKS</h1>
-            <p class="subtitle">我的台灣百岳版圖</p>
+            <p class="subtitle">YOUR JOURNEY, YOUR TAIWAN MAP</p>
         </div>
-
         <div id="map"></div>
-        
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar">0%</div>
         </div>
-
         <div class="search-container">
             <input type="text" id="search-input" placeholder="🔍 輸入山名快速尋找 (如: 玉山)" onkeyup="filterPeaks()">
         </div>
-
-        <div class="grid" id="peaks-grid">
-            </div>
+        <div class="grid" id="peaks-grid"></div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -186,7 +220,8 @@
 
         function initMap() {
             map = L.map('map').setView([23.7, 121.0], 7);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
                 subdomains: 'abcd',
                 maxZoom: 20
@@ -197,20 +232,32 @@
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
 
-            peaksData.forEach((peak) => {
-                const markerColor = peak.climbed ? '#d4af37' : '#475569';
-                const fillOpacity = peak.climbed ? 0.9 : 0.4;
-                const radius = peak.climbed ? 8 : 4; 
+            peaksData.forEach((peak, index) => {
+                const isClimbed = peak.climbed;
+                
+                // 改用全新的 HTML 山頭結構
+                const iconHtml = `
+                    <div class="mountain-marker ${isClimbed ? 'climbed' : 'unclimbed'}">
+                        <div class="icon">▲</div>
+                        <div class="name">${peak.name}</div>
+                    </div>
+                `;
 
-                const marker = L.circleMarker([peak.lat, peak.lng], {
-                    radius: radius,
-                    color: markerColor,
-                    fillColor: markerColor,
-                    fillOpacity: fillOpacity,
-                    weight: 2
+                // 註冊為 Leaflet 的 divIcon
+                const customIcon = L.divIcon({
+                    html: iconHtml,
+                    className: 'custom-mountain-icon',
+                    iconSize: [0, 0], // 設定為 0 搭配 CSS 來置中
+                    iconAnchor: [0, 0],
+                    popupAnchor: [0, -25]
+                });
+
+                const marker = L.marker([peak.lat, peak.lng], {
+                    icon: customIcon,
+                    zIndexOffset: isClimbed ? 1000 : 0 // 把已登頂的金色山頭強制推到最上層
                 }).addTo(map);
 
-                marker.bindPopup(`<b>${peak.name}</b><br>海拔: ${peak.height}m<br>狀態: ${peak.climbed ? '已登頂 🏆' : '尚未挑戰'}`);
+                marker.bindPopup(`<b>${peak.name}</b><br>海拔: ${peak.height}m<br>狀態: ${isClimbed ? '已登頂 🏆' : '尚未挑戰'}`);
                 markers.push(marker);
             });
         }
@@ -290,7 +337,6 @@
         renderMarkers();
         renderPeaks();
         
-        // 修正手機版地圖載入不全的問題
         setTimeout(() => { map.invalidateSize(); }, 500);
     </script>
 </body>
