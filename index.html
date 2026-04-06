@@ -57,7 +57,7 @@
         .checkbox-wrapper input { margin-right: 12px; transform: scale(1.4); cursor: pointer; accent-color: var(--gold-accent); }
         .checkbox-wrapper label { cursor: pointer; font-weight: 600; color: var(--text-main); }
 
-        /* ================= 新增：實體山岳圖示樣式 ================= */
+        /* ================= 實體山岳圖示樣式 ================= */
         .custom-mountain-icon { background: transparent; border: none; }
         .mountain-marker { 
             display: flex; flex-direction: column; align-items: center; 
@@ -89,7 +89,7 @@
         }
         .mountain-marker.climbed .name { 
             background: rgba(227, 180, 72, 0.95); color: #2C3E50; 
-            border: 1px solid #2C3E50; font-size: 12px; /* 登頂的山名字稍微放大 */
+            border: 1px solid #2C3E50; font-size: 12px; 
         }
     </style>
 </head>
@@ -155,7 +155,7 @@
             { id: 41, name: "白姑大山", height: 3341, lat: 24.2058, lng: 121.1092, climbed: false },
             { id: 42, name: "能高山南峰", height: 3349, lat: 23.9556, lng: 121.2639, climbed: false },
             { id: 43, name: "火石山", height: 3310, lat: 24.3942, lng: 121.1969, climbed: false },
-            { id: 44, name: "建宏山 (雪山東峰)", height: 3201, lat: 24.3872, lng: 121.2644, climbed: false },
+            { id: 44, name: "審馬陣山", height: 3141, lat: 24.3900, lng: 121.4117, climbed: false },
             { id: 45, name: "新康山", height: 3331, lat: 23.3056, lng: 121.1094, climbed: false },
             { id: 46, name: "屏風山", height: 3250, lat: 24.1558, lng: 121.3411, climbed: false },
             { id: 47, name: "布庫山 (無雙山)", height: 3231, lat: 23.5700, lng: 121.1042, climbed: false },
@@ -187,7 +187,7 @@
             { id: 73, name: "大南山", height: 3148, lat: 23.4683, lng: 121.0858, climbed: false },
             { id: 74, name: "關山嶺山", height: 3176, lat: 23.2750, lng: 120.9583, climbed: false },
             { id: 75, name: "畢祿山", height: 3371, lat: 24.2189, lng: 121.3414, climbed: false },
-            { id: 76, name: "太太群 (達芬尖山)", height: 3208, lat: 23.4150, lng: 121.0114, climbed: false },
+            { id: 76, name: "達芬尖山", height: 3208, lat: 23.4150, lng: 121.0114, climbed: false },
             { id: 77, name: "白石山", height: 3110, lat: 23.9161, lng: 121.2403, climbed: false },
             { id: 78, name: "光頭山", height: 3060, lat: 23.9458, lng: 121.2406, climbed: false },
             { id: 79, name: "塔芬山", height: 3070, lat: 23.3853, lng: 121.0369, climbed: false },
@@ -199,7 +199,7 @@
             { id: 85, name: "北大武山", height: 3092, lat: 22.6272, lng: 120.7525, climbed: false },
             { id: 86, name: "加利山", height: 3112, lat: 24.4531, lng: 121.2269, climbed: false },
             { id: 87, name: "知本主山", height: 3188, lat: 22.6517, lng: 120.8033, climbed: false },
-            { id: 88, name: "大南山北峰", height: 3148, lat: 23.4750, lng: 121.0858, climbed: false },
+            { id: 88, name: "馬比杉山", height: 3211, lat: 24.3297, lng: 121.4650, climbed: false },
             { id: 89, name: "西巒大山", height: 3081, lat: 23.6828, lng: 120.9536, climbed: false },
             { id: 90, name: "立霧主山", height: 3070, lat: 24.0864, lng: 121.4361, climbed: false },
             { id: 91, name: "安東軍山南峰", height: 3068, lat: 23.8767, lng: 121.2333, climbed: false },
@@ -214,7 +214,8 @@
             { id: 100, name: "鹿山", height: 2981, lat: 23.4350, lng: 120.9936, climbed: false }
         ];
 
-        let peaksData = JSON.parse(localStorage.getItem('myBaiyueMapData')) || initialPeaks;
+        // 升級成 v2，強迫瀏覽器載入最新名單
+        let peaksData = JSON.parse(localStorage.getItem('myBaiyueMapData_v2')) || initialPeaks;
         let map;
         let markers = []; 
 
@@ -235,7 +236,6 @@
             peaksData.forEach((peak, index) => {
                 const isClimbed = peak.climbed;
                 
-                // 改用全新的 HTML 山頭結構
                 const iconHtml = `
                     <div class="mountain-marker ${isClimbed ? 'climbed' : 'unclimbed'}">
                         <div class="icon">▲</div>
@@ -243,18 +243,17 @@
                     </div>
                 `;
 
-                // 註冊為 Leaflet 的 divIcon
                 const customIcon = L.divIcon({
                     html: iconHtml,
                     className: 'custom-mountain-icon',
-                    iconSize: [0, 0], // 設定為 0 搭配 CSS 來置中
+                    iconSize: [0, 0], 
                     iconAnchor: [0, 0],
                     popupAnchor: [0, -25]
                 });
 
                 const marker = L.marker([peak.lat, peak.lng], {
                     icon: customIcon,
-                    zIndexOffset: isClimbed ? 1000 : 0 // 把已登頂的金色山頭強制推到最上層
+                    zIndexOffset: isClimbed ? 1000 : 0 
                 }).addTo(map);
 
                 marker.bindPopup(`<b>${peak.name}</b><br>海拔: ${peak.height}m<br>狀態: ${isClimbed ? '已登頂 🏆' : '尚未挑戰'}`);
@@ -322,7 +321,8 @@
         }
 
         function saveData() {
-            localStorage.setItem('myBaiyueMapData', JSON.stringify(peaksData));
+            // 存檔時也一併寫入 v2 版本
+            localStorage.setItem('myBaiyueMapData_v2', JSON.stringify(peaksData));
         }
 
         function updateProgress(climbedCount) {
